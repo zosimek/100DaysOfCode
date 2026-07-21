@@ -10,13 +10,13 @@ class InvalidDirection(Exception):
 class InvalidTransportation(Exception):
     def __init__(self, lake_transport: str):
         self.lake_transport = lake_transport
-        super().__init__(f'Invalid tipping option: "{lake_transport}". It has to be "wait" or "swim".')
+        super().__init__(f'Invalid transport option: "{lake_transport}". It has to be "wait" or "swim".')
         
 
 class InvalidDoor(Exception):
     def __init__(self, door: str):
         self.door = door
-        super().__init__(f'Invalid tipping option: "{door}". It has to be "red", "yellow" or "blue".')
+        super().__init__(f'Invalid door option: "{door}". It has to be "red", "yellow" or "blue".')
         
         
 
