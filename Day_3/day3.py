@@ -3,19 +3,19 @@ import sys
 
 class InvalidDirection(Exception):
     def __init__(self, direction: str):
-        self.tip_option = direction
+        self.direction = direction
         super().__init__(f'Invalid direction: "{direction}". It has to be "forward", "back", "left" or "right".')
 
 
 class InvalidTransportation(Exception):
     def __init__(self, lake_transport: str):
-        self.tip_option = lake_transport
+        self.lake_transport = lake_transport
         super().__init__(f'Invalid tipping option: "{lake_transport}". It has to be "wait" or "swim".')
         
 
 class InvalidDoor(Exception):
     def __init__(self, door: str):
-        self.tip_option = door
+        self.door = door
         super().__init__(f'Invalid tipping option: "{door}". It has to be "red", "yellow" or "blue".')
         
         
