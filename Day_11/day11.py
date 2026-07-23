@@ -1,3 +1,7 @@
+"""
+Blackjack console game without split option.
+"""
+
 ######################## IMPORTS ################################
 import random
 
@@ -64,56 +68,97 @@ def deal_cards_additional(deck):
         
     return chosen_cards[0]
 
-def calculate_points(player_cards, computer_cards):
-    player_points   = []
-    computer_points = []
-    
-    for card in player_cards:
-        player_points.append(card_values[card])
 
-    for card in computer_cards:
-        computer_points.append(card_values[card]) 
+def compensate_aces(points, points_total):
+    while points_total > 21 and 11 in points:
+        ace_index = points.index(11)
+        points[ace_index] = 1
+        points_total -= 10
+
+    return points, points_total
+
+
+def player_hit(deck, player_cards, player_points, player_points_total):
+    next_deal = "y"
+
+    while next_deal == "y":
+        # Always recalculate from the current cards
+        player_points, player_points_total = calculate_points(player_cards)
+
+        # Change aces from 11 to 1 only when necessary
+        while player_points_total > 21 and 11 in player_points:
+            ace_index = player_points.index(11)
+            player_points[ace_index] = 1
+            player_points_total -= 10
+
+        print(
+            f"Your cards: {player_cards}.\n"
+            f"Points: {player_points}\n"
+            f"Total points: {player_points_total}"
+        )
+
+        if player_points_total >= 21:
+            next_deal = "n"
+        else:
+            next_deal = input(
+                'Type "y" to get another card, type "n" to pass: '
+            ).lower()
+
+            if next_deal == "y":
+                player_cards.append(deal_cards_additional(deck))
+
+    return player_points, player_points_total
+
+
+
+def calculate_points(cards):
+    points   = []
     
-    player_points_total = sum(player_points)
-    computer_points_total = sum(computer_points)
+    for card in cards:
+        points.append(card_values[card])
+    points_total = sum(points)
     
-    return player_points, player_points_total, computer_points, computer_points_total
+    return points, points_total
+
 #########
 def blackjack_game(cards = cards, continue_game = True):
     while continue_game:
         
         print(logo)
+        deck = cards 
         
-        deck = cards
-        next_deal = "y"
-        deal_count = 1
-        
-        print("Welcome to Blackjack! Wish you best of luck :-)\n To win colect a total of 21 points or be closer to this number than your oponent.")
+        print("Welcome to Blackjack! Wish you best of luck :-)\n To win collect a total of 21 points or be closer to this number than your oponent.")
         player_cards   = deal_cards_initial(deck)
         computer_cards = deal_cards_initial(deck)
-        player_points, player_points_total, computer_points, computer_points_total = calculate_points(player_cards, computer_cards)
         
-        while player_points_total <= 21 and computer_points_total <= 21 and next_deal == "y":
+        player_points, player_points_total = calculate_points(player_cards)
+        computer_points, computer_points_total = calculate_points(computer_cards)
+        computer_points, computer_points_total = compensate_aces(computer_points, computer_points_total)
+        
+        print(f"Computer's first card: {computer_cards[0]}\n Points: {computer_points[0]}\n")
+        
+        # part when the player can hit (take another card)
+        player_points, player_points_total = player_hit(deck, player_cards, player_points, player_points_total)
+        
+        # computer (dealer) card draw
+        while computer_points_total < 17:
+            computer_cards.append(deal_cards_additional(deck))
+        
+            computer_points, computer_points_total = calculate_points(computer_cards)
+        
+            computer_points, computer_points_total = compensate_aces(
+                computer_points,
+                computer_points_total
+            )
             
-            player_points, player_points_total, computer_points, computer_points_total = calculate_points(player_cards, computer_cards)
-            
-            print(f"Your cards: {player_cards}.\nPoints: {player_points}\nTotal points: {player_points_total}")
-            print(f"Computer's first card: {computer_cards[0:deal_count]}\n Points: {computer_points[0:deal_count]}")
-            if player_points_total < 21 and computer_points_total < 21:
-                next_deal = input(r"""Type "y" to get another card, type "n" to pass: """).lower()
-                if next_deal == "y":
-                    deal_count += 1
-                    player_cards.append(deal_cards_additional(deck))
-                    computer_cards.append(deal_cards_additional(deck))
-
         player_diff = abs(21 - player_points_total)
         computer_diff = abs(21 - computer_points_total)
-        if (player_points_total <= 21 and player_diff < computer_diff) or computer_points_total > 21:
-            print(f"Congtatulations! You win! You had {player_points_total} and computer had {computer_points_total}")
+        if (player_points_total <= 21 and player_diff < computer_diff) or (computer_points_total > 21 and player_points_total <= 21):
+            print(f"Congtatulations! You win! You had {player_points_total} and computer had {computer_points_total}.\n Computer's cards: {computer_cards}. Computer's points: {computer_points}.")
         elif player_points_total <= 21 and player_diff == computer_diff:
-            print(f"Push! You and the computer had the same number of points: {player_points_total}")
+            print(f"Push! You and the computer had the same number of points: {player_points_total}.\n Computer's cards: {computer_cards}. Computer's points: {computer_points}.")
         else:
-            print(f"Bad luck mate! You loose! You had {player_points_total} and computer had {computer_points_total}")
+            print(f"Bad luck mate! You loose! You had {player_points_total} and computer had {computer_points_total}.\n Computer's cards: {computer_cards}. Computer's points: {computer_points}.")
 
         answer = input(r"""Do you want to play a game of Blackjack again? Type"y" or "n": """) 
         continue_game = False if answer == "n" else True
